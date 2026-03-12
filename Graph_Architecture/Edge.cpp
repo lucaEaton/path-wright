@@ -36,7 +36,7 @@ double Edge::calcWeight() const {
  * @param from a vertex
  * @return its neighboring node
  */
-Vertex* Edge::getNeighbor(const Vertex* from) const {return (from == srcNode_) ? dstNode_ : srcNode_;}
+Vertex* Edge::getNeighbor(const Vertex* from) const {return from == srcNode_ ? dstNode_ : srcNode_;}
 /**
  *
  * @return source node of an edge

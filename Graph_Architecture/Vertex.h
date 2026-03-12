@@ -13,9 +13,20 @@ private:
     size_t id_;
     double lat_;
     double lon_;
+    vector<Edge*> edges_;
 public:
     Vertex();
     Vertex(long long i, double la, double lo);
+
+    void addEdge(Edge *edge);
+
+    const std::vector<Edge *> &getEdges() const;
+
+    size_t getId() const;
+
+    double getLat() const;
+
+    double getLon() const;
 };
 
 

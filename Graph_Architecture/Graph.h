@@ -6,24 +6,32 @@
 #define GRAPH_H
 #include <unordered_map>
 #include <vector>
+#include <memory>
+
 using namespace std;
 class Vertex;
 class Edge;
 class Graph {
 private:
-    unordered_map<long long, vector<Vertex*>> adj_;
-    vector<Edge*> edges_;
+    unordered_map<long long, std::unique_ptr<Vertex>> vertices_;
+    vector<std::unique_ptr<Edge>> edges_;
 
 public:
+    void addVertx(long long id, double lat, double lng);
 
+    Vertex *getVertex(long long id) const;
+
+    void addEdge(long long srcId, long long dstId, double dist, double sL, std::string &sN);
+
+    const std::unordered_map<long long, std::unique_ptr<Vertex>> &getVertices() const;
 };
+
+//NOTES
 // We need an edge list to begin with. Idk how we get that edge list but its possible
 /*
  * for (const auto& e : edge)
  *      adj[e[0]].push_back(e[1]);
-*/
-
-/* Assume I have edges_ = vector<Edge*>
+ * Assume I have edges_ = vector<Edge*>
  * for (const auto& e : edges_)
  *  Vertex* src = edge->getSource();
  *  Vertex* dest = edge->getDest();
@@ -32,6 +40,5 @@ public:
 // {v1 : v2, ..., vn}
 // unordered_map<Vertex, vector<Vertex>>
 // you have to define a custom hash function for vertices
-
 
 #endif //GRAPH_H
