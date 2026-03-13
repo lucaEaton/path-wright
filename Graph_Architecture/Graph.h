@@ -17,6 +17,7 @@ private:
     vector<std::unique_ptr<Edge>> edges_;
 
 public:
+    Graph(size_t vertexCount, size_t edgeCount);
     void addVertx(long long id, double lat, double lng);
 
     [[nodiscard]] Vertex *getVertex(long long id) const;

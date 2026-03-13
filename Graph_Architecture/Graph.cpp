@@ -7,6 +7,12 @@
 
 #include "Edge.h"
 #include "Vertex.h"
+
+Graph::Graph(const size_t vertexCount, const size_t edgeCount) {
+    vertices_.reserve(vertexCount);
+    edges_.reserve(edgeCount);
+}
+
 /**
  *
  * All data will be found when parsed through the data
@@ -16,9 +22,7 @@
  * @param lng longitude of vertex
  */
 void Graph::addVertx(long long id, double lat, double lng) {
-    if (const long long node_id = id; !vertices_.contains(node_id)) {
-        vertices_[node_id] = std::make_unique<Vertex>(id, lat, lng);
-    }
+    vertices_.try_emplace(id, std::make_unique<Vertex>(id, lat, lng));
 }
 /**
  *
@@ -46,7 +50,7 @@ void Graph::addEdge(long long id, Vertex* src, Vertex* dst, double dist, double 
     if (!src || !dst) return; //don't add if they don't exist
 
     //unique pointer
-    auto e = std::make_unique<Edge>(id, src, dst, dist, sL, sN);
+    auto e = std::make_unique<Edge>(id, src, dst, dist, sL, std::move(sN));
     Edge* rAddress = e.get();
     src->addEdge(rAddress), dst->addEdge(rAddress); // register the same edge
     edges_.push_back(std::move(e)); // transfer ownership so the edge object lives on.
