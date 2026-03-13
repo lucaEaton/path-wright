@@ -59,5 +59,20 @@ const std::unordered_map<long long, std::unique_ptr<Vertex>>& Graph::getVertices
     return vertices_;
 }
 
+/**
+ * print function for debugging
+ */
+void Graph::print() const {
+    for (const auto& [id, vertex] : vertices_) {
+        std::cout << "Vertex " << id << " (" << vertex->getLat() << ", " << vertex->getLon() << ")\n";
+        for (const Edge* e : vertex->getEdges()) {
+            const Vertex* neighbor = e->getNeighbor(vertex.get());
+            std::cout << "  → " << neighbor->getId()
+                      << " | " << e->getStreetName()
+                      << " | dist: " << e->getDistance()
+                      << " | weight: " << e->getWeight() << "\n";
+        }
+    }
+}
 
 
