@@ -1,7 +1,3 @@
-//
-// Created by luca eaton on 3/11/26.
-//
-
 #include "Vertex.h"
 /*
  * constructor
@@ -34,7 +30,7 @@ const std::vector<Edge*>& Vertex::getEdges() const {
  *
  * @return id number of node
  */
-size_t Vertex::getId() const { return id_;}
+long long Vertex::getId() const { return id_;}
 /**
  * @note
  * allows for easy look up for the latitude of a vertex

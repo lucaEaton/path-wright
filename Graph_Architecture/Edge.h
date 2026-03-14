@@ -1,7 +1,3 @@
-//
-// Created by luca eaton on 3/9/26.
-//
-
 #ifndef EDGE_H
 #define EDGE_H
 #include <string>

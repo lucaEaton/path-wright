@@ -1,7 +1,3 @@
-//
-// Created by luca eaton on 3/9/26.
-//
-
 #include "Edge.h"
 #include <utility>
 #include <algorithm>

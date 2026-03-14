@@ -1,6 +1,3 @@
-//
-// Created by luca eaton on 3/11/26.
-//
 #include "Dataset.h"
 #include <iostream>
 #include <string>
@@ -49,8 +46,8 @@ size_t Dataset::WriteCallback(void* contents, size_t size, size_t nmemb, void* u
  * a temporary string. After the request finishes, the data is saved
  * into the class's private variable `jsonData`.
  *
- * Time Complex : O(N) n = size of res
- * Space Complex : O(N) due to storing the response within a string 'jsonData'.
+ * @timecomplex O(N) n = size of res
+ * @spacecomplex O(N) due to storing the response within a string 'jsonData'.
  */
 void Dataset::overseeAPI() {
     CURL *curl = curl_easy_init();
@@ -75,7 +72,7 @@ void Dataset::overseeAPI() {
     //std::cout << jsonData << std::endl; // testing to see if its saved
 }
 /*
- * @Note
+ * @note
  * Done to find the distance between points(lat n long) using the Haversine function
  * due to the oversees api not providing the distance
  *
@@ -156,6 +153,7 @@ double haversine(const double lat1d, const double lon1d, const double lat2d, con
  * All 'way' arrays hold a 'nodes' arrays so we loop over it in a makeshift sliding window,
  * with ith node being the source vertex and the i+1th node being the destination vertex
  * Add the edge objects to the edge map and street map
+ * @see 191-214
  *
  * @endruns
  *
@@ -197,10 +195,12 @@ double haversine(const double lat1d, const double lon1d, const double lat2d, con
             const auto& t = e["tags"];
             const string name = t.value("name", "unknown"); //catch incase name tag is missing
             //For some reason the maxspeed or speed limit isn't displayed, but I assume if it's not listed, its 25 according to nyc law.
-            double speed = 25;
-            if (t.contains("maxspeed")) speed = std::stod(t["maxspeed"].get<std::string>());
+            double speed = 25 * 1.60934;  // default 25mph to 40.23 km/h
+            if (t.contains("maxspeed")) speed = std::stod(t["maxspeed"].get<std::string>()) * 1.60934;
             const auto& u = e["nodes"];
             for (size_t i = 0; i+1<u.size(); ++i) {
+                const long long segmentID = edgeID * 100 + static_cast<long long>(i); // unique per segment
+
                 /*
                  * sliding window : gather nodes in pairs of 2 to create edges
                  * as a street may hold more than one node.
@@ -210,8 +210,8 @@ double haversine(const double lat1d, const double lon1d, const double lat2d, con
                 //calc distance between 2 nodes
                 const double dist = haversine(srcNode->getLat(), srcNode->getLon(), destNode->getLat(), destNode->getLon());
 
-                graph.addStreet(edgeID,name);
-                graph.addEdge(edgeID,srcNode,destNode,dist,speed,name);
+                graph.addStreet(segmentID,name);
+                graph.addEdge(segmentID,srcNode,destNode,dist,speed,name);
             }
         }
     }

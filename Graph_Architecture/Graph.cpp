@@ -1,16 +1,12 @@
-//
-// Created by luca eaton on 3/11/26.
-
 #include "Graph.h"
-
 #include <iostream>
-
 #include "Edge.h"
 #include "Vertex.h"
 
 Graph::Graph(const size_t vertexCount, const size_t edgeCount) {
     vertices_.reserve(vertexCount);
     edges_.reserve(edgeCount);
+    streetMap_.reserve(edgeCount);
 }
 /**
  * @note
@@ -47,6 +43,8 @@ void Graph::addStreet(long long id, std::string street) {
  * @relates Graph::vertices_
  * @param id id of the wanted Vertex
  * @return vertex object from the unordered_map
+ *
+ * @timecomplex O(1)
  */
 Vertex* Graph::getVertex(long long id) const {
     const auto it = vertices_.find(id);
@@ -66,6 +64,8 @@ Vertex* Graph::getVertex(long long id) const {
  * @param dist distance of the street
  * @param sL max speed of the street
  * @param sN street name
+ *
+ * @timecomplex O(1)
  */
 void Graph::addEdge(long long id, Vertex* src, Vertex* dst, double dist, double sL, std::string sN) {
     if (!src || !dst) return; //don't add if they don't exist
@@ -110,17 +110,20 @@ Edge* Graph::nameToEdge(const string &name) const {
 const std::unordered_map<long long, std::unique_ptr<Vertex>>& Graph::getVertices() const {
     return vertices_;
 }
-
-int Graph::Dijkstra(const Edge &streetA, const Edge &streetB) {
+// as of rn returns how long it would take in mins
+double Graph::Dijkstra(const Edge &streetA, const Edge &streetB) const {
     unordered_map<long long, bool> vst; // visited list
-    unordered_map<long long, int> dist; // distance list (cost)
-    Vertex* src = streetA.getSrc();
-    Vertex* target = streetB.getDst();
-    priority_queue<pair<int, long long>, std::greater<>> pq;
+    unordered_map<long long, double> dist; // distance list (cost)
+    // set all indexes to INF
+    for (const auto &id: getVertices() | views::keys) dist[id] = INT_MAX;
+    const Vertex* src = streetA.getSrc();
+    const Vertex* target = streetB.getDst();
+    priority_queue<pair<int, long long>, vector<pair<int, long long>>, std::greater<>> pq;
     dist[src->getId()] = 0;
-    pq.push({0, src});
+    pq.push({0, src->getId()});
     while (!pq.empty()) {
-        Vertex* current = pq.top().second;
+        long long currId = pq.top().second;
+        Vertex* current = getVertex(currId);
         pq.pop();
         if (vst.contains(current->getId())) continue;
         vst[current->getId()] = true;
@@ -133,7 +136,13 @@ int Graph::Dijkstra(const Edge &streetA, const Edge &streetB) {
             }
         }
     }
-    return dist[target->getId()];
+    if (dist[target->getId()] * 60 >= INT_MAX) {
+        std::cout << "No path possibly between" << streetA.getStreetName() << " and " << streetB.getStreetName() << "." << std::endl;
+    } else {
+        std::cout << "Travel time between "<< streetA.getStreetName() << " and " << streetB.getStreetName() << " : "<< dist[target->getId()] * 60 << " mins";
+    }
+
+    return dist[target->getId()] * 60;
 }
 
 
