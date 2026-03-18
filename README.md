@@ -9,7 +9,6 @@ A real-time road network graph built from live OpenStreetMap data, with shortest
 
 
 ## How It Works
--
 ### Getting the Data
 The program sends a http request to the [OpenStreetMap Overpass API](https://overpass-api.de/) and pulls back every road, intersection, and speed limit in the queried area. No static files, no manual downloads — it fetches live every time.
 
