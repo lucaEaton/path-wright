@@ -1,6 +1,9 @@
 # PathWright
 A real-time road network graph built from live OpenStreetMap data, with shortest-path routing based on actual travel time. Built in C++ as the foundation for an adaptive traffic signal control system.
 
+## Status
+- Work in Progress (actively being developed)
+
 ## What It Does
 - Pulls live road data for a given area of Manhattan from OpenStreetMap
 - Builds a graph where every intersection is a node and every road segment is an edge
@@ -27,7 +30,9 @@ Distance alone isn't a great measure of how long a route takes. A short road wit
 Dijkstra's algorithm runs on the graph to find the optimal path between two points, returning the estimated travel time in minutes.
 
 ## Next step
-Right now edge weights are based on static speed limits from the map data. The next step is making them dynamic, updating road speeds based on real-time congestion so the graph reflects what's actually happening on the street, not just what the speed limit says. From there, the goal is a full adaptive traffic signal systemm using congestion per intersection to adjust green light timings in real time, and re-routing traffic automatically as conditions change.
+- Right now edge weights are based on static speed limits from the map data. The next step is making them dynamic, updating road speeds based on real-time congestion so the graph reflects what's actually happening on the street, not just what the speed limit says. From there, the goal is a full adaptive traffic signal systemm using congestion per intersection to adjust green light timings in real time, and re-routing traffic automatically as conditions change.
+
+- Quality Assurance (QA)
 
 ## Tech Stack
 - **C++**
