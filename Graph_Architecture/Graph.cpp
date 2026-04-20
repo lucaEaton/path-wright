@@ -101,6 +101,15 @@ Edge* Graph::nameToEdge(const string &name) const {
     return edges_.find(id)->second.get();
 }
 /**
+ *
+ * @param id id of edge wanted
+ * @return the edge object
+ */
+Edge* Graph::getEdge(const long long id) const {
+    const auto it = edges_.find(id);
+    return (it != edges_.end()) ? it->second.get() : nullptr;
+}
+/**
  * @note
  * Look up map for all existing vertices
  *
@@ -174,9 +183,18 @@ void Graph::print() const {
             std::cout << "  → " << neighbor->getId()
                       << " | " << e->getStreetName()
                       << " | dist: " << e->getDistance()
-                      << " | weight: " << e->getWeight() << "\n";
+                      << " | weight: " << e->getWeight()
+                      << " | free flow speed: " << e->getFreeFlowS() << std::endl;
         }
     }
 }
+/**
+ *
+ * @return the id -> edge look up map
+ */
+const std::unordered_map<long long, std::unique_ptr<Edge>>& Graph::getEdges() const {
+    return edges_;
+}
+
 
 

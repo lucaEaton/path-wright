@@ -14,11 +14,12 @@ class Graph {
         [[nodiscard]] Vertex *getVertex(long long id) const;
         void addEdge(long long id, Vertex *src, Vertex *dst, double dist, double sL, std::string sN, double sF);
         [[nodiscard]] Edge *nameToEdge(const string &name) const;
+        [[nodiscard]] Edge *getEdge(long long id) const;
         [[nodiscard]] const std::unordered_map<long long, std::unique_ptr<Vertex>> &getVertices() const;
-
-        double Dijkstra(const Edge &streetA, const Edge &streetB) const;
+        [[nodiscard]] double Dijkstra(const Edge &streetA, const Edge &streetB) const;
         [[nodiscard]] size_t size() const;
         void print() const;
+        [[nodiscard]] const unordered_map<long long, std::unique_ptr<Edge>>& getEdges() const;
 
     private:
         unordered_map<long long, std::unique_ptr<Vertex>> vertices_;

@@ -16,6 +16,17 @@ class Edge {
         [[nodiscard]] double getDistance() const;
         [[nodiscard]] double getSpeedLimit() const;
         [[nodiscard]] double getWeight() const;
+
+        double getFreeFlowS() const;
+
+        void setWeight(double w);
+
+        void setSpeed(double s);
+
+        void setFreeFlowS(double f);
+
+        double setLiveWeight(double s, double f);
+
         Edge();
 
         Edge(long long id, Vertex *src, Vertex *dst, double len, double limit, string name, double ffSpeed);
@@ -25,7 +36,7 @@ class Edge {
         long long id_;
         string streetName_;
         double distance_;
-        double speedLimit_;
+        double speed_;
         double ffSpeed_;
         double weight_;
         Vertex *srcNode_;
