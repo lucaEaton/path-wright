@@ -4,6 +4,7 @@
 #include <fstream>
 #include <unordered_set>
 
+#include "../utils.h"
 #include "Edge.h"
 #include "Vertex.h"
 
@@ -228,6 +229,89 @@ Graph::RouteResult Graph::Dijkstra(const string &nameA, const string &nameB) con
         return {};
     }
     std::cout << "\n(Dijkstra) Shortest travel time between " << nameA << " and " << nameB << " : "
+            << std::ceil(best) << " mins\n";
+    std::cout << "Time Taken :" << duration << std::endl;
+
+    // reconstruct path by walking back through prev
+    RouteResult result;
+    result.travelTime = std::ceil(best);
+    // start at the target and walk backwards through prev
+    // we stop once we hit the source node
+    for (long long cur = target; cur != src; cur = prev[cur]) {
+        const Vertex *v = getVertex(cur);
+        result.path.emplace_back(v->getLat(), v->getLon());
+    }
+    const Vertex *srcV = getVertex(src);
+    result.path.emplace_back(srcV->getLat(), srcV->getLon());
+    // reverse since its target -> src we want src -> target
+    ranges::reverse(result.path);
+
+    return result;
+}
+
+double Graph::heuristic(long long a, long long b) const {
+    const double dist_km = haversine(vertices_.at(a)->getLat(), vertices_.at(a)->getLon(),
+                                     vertices_.at(b)->getLat(), vertices_.at(b)->getLon());
+    // 120.7 because We divide by the fastest possible speed because the heuristic must
+    // never overestimate the true travel time.
+    // to get mim possible time between two points we need the distance and the
+    // highest speed of a road in this case 50mph -> 80.5 kmh
+    return (dist_km / 20.0) * 60.0;
+}
+
+Graph::RouteResult Graph::AStar(const string &nameA, const string &nameB) const {
+    const auto t_start = std::chrono::high_resolution_clock::now();
+    unordered_set<long long> vst;
+    unordered_map<long long, double> dist;
+    unordered_map<long long, long long> prev;
+    unordered_map<long long, double> g; // actual cost from src
+
+    for (const auto &id: getVertices() | views::keys) {
+        dist[id] = std::numeric_limits<double>::infinity();
+        g[id] = std::numeric_limits<double>::infinity();
+    }
+
+    const auto sourcesA = nameToVertices(nameA);
+    const auto targetsB = nameToVertices(nameB);
+    if (sourcesA.empty() || targetsB.empty()) return {};
+
+    const long long src = findNode(sourcesA, targetsB);
+    const long long target = findNode(targetsB, sourcesA);
+    if (src < 0 || target < 0) return {};
+
+    priority_queue<pair<double, long long>, vector<pair<double, long long> >, std::greater<> > pq;
+    g[src] = 0.0;
+    dist[src] = heuristic(src, target);
+    pq.emplace(dist[src], src);
+
+    while (!pq.empty()) {
+        const long long currId = pq.top().second;
+        pq.pop();
+        if (currId == target) break;
+        if (vst.contains(currId)) continue;
+        const Vertex *current = getVertex(currId);
+        vst.insert(currId);
+
+        for (auto u: current->getEdges()) {
+            auto b = u->getNeighbor(current);
+            auto w = u->getWeight();
+            if (g[currId] + w < g[b->getId()]) {
+                g[b->getId()] = g[currId] + w;
+                dist[b->getId()] = g[b->getId()] + heuristic(b->getId(), target);
+                prev[b->getId()] = currId;
+                pq.emplace(dist[b->getId()], b->getId());
+            }
+        }
+    }
+    const auto t_end = std::chrono::high_resolution_clock::now();
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t_end - t_start);
+
+    const double best = dist[target];
+    if (best == std::numeric_limits<double>::infinity()) {
+        std::cout << "No path possibly between " << nameA << " and " << nameB << "." << std::endl;
+        return {};
+    }
+    std::cout << "\n(A*) Shortest travel time between " << nameA << " and " << nameB << " : "
             << std::ceil(best) << " mins\n";
     std::cout << "Time Taken :" << duration << std::endl;
 

@@ -17,26 +17,55 @@ int main() {
     for (const auto &edges: graph->getEdges() | std::views::values) {
         streetNames.emplace(edges->getStreetName());
     }
-    graph->print();
+    //graph->print();
 
     auto &cors = app.get_middleware<crow::CORSHandler>();
     cors.global()
             .origin("http://localhost:5173")
             .methods("GET"_method);
 
+    CROW_ROUTE(app, "/streets")([&streetNames](){
+        nlohmann::json res;
+        res["availableStreets"] = nlohmann::json::array();
+        for (const auto &st : streetNames) res["availableStreets"].push_back(st);
+        crow::response r(200, res.dump());
+        r.set_header("Content-Type", "application/json");
+        r.set_header("Access-Control-Allow-Origin", "http://localhost:5173");
+        return r;
+    });
+
     CROW_ROUTE(app, "/dijkstra")([&graph, &graph_mutex](const crow::request &req) {
         if (!graph) return crow::response(400, "Graph not loaded");
         const auto sA = req.url_params.get("streeta");
         const auto sB = req.url_params.get("streetb");
         std::lock_guard<std::mutex> lock(graph_mutex);
-        const auto result = graph->Dijkstra(sA, sB);
-        if (result.travelTime < 0) return crow::response(404, "No path found");
+        const auto [travelTime, path] = graph->Dijkstra(sA, sB);
+        if (travelTime < 0) return crow::response(404, "No path found");
 
         nlohmann::json res;
-        res["travelTime"] = result.travelTime;
+        res["travelTime"] = travelTime;
         res["path"] = nlohmann::json::array();
         // convert our result.path to now a json array
-        for (const auto &[lat, lon]: result.path) res["path"].push_back({{"lat", lat}, {"lon", lon}});
+        for (const auto &[lat, lon]: path) res["path"].push_back({{"lat", lat}, {"lon", lon}});
+
+        crow::response r(200, res.dump());
+        r.add_header("Content-Type", "application/json");
+        return r;
+    });
+
+    CROW_ROUTE(app, "/aStar")([&graph, &graph_mutex](const crow::request &req) {
+        if (!graph) return crow::response(400, "Graph not loaded");
+        const auto sA = req.url_params.get("streeta");
+        const auto sB = req.url_params.get("streetb");
+        std::lock_guard<std::mutex> lock(graph_mutex);
+        const auto [travelTime, path] = graph->AStar(sA, sB);
+        if (travelTime < 0) return crow::response(404, "No path found");
+
+        nlohmann::json res;
+        res["travelTime"] = travelTime;
+        res["path"] = nlohmann::json::array();
+        // convert our result.path to now a json array
+        for (const auto &[lat, lon]: path) res["path"].push_back({{"lat", lat}, {"lon", lon}});
 
         crow::response r(200, res.dump());
         r.add_header("Content-Type", "application/json");

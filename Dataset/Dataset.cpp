@@ -3,6 +3,7 @@
 #include <string>
 #include <curl/curl.h>
 #include <chrono>
+#include "../utils.h"
 #include <nlohmann/json.hpp>
 #include "../Graph_Architecture/Graph.h"
 #include "../Graph_Architecture/Vertex.h"
@@ -79,28 +80,7 @@ void Dataset::overseeAPI() {
     //std::cout << jsonData << std::endl; // testing to see if its saved
 }
 
-/*
- * @note
- * Done to find the distance between points(lat n long) using the Haversine function
- * due to the oversees api not providing the distance
- *
- * Sourced from GeeksForGeeks
- * : https://www.geeksforgeeks.org/dsa/haversine-formula-to-find-distance-between-two-points-on-a-sphere/
- */
-double deg2rad(double deg) { return (deg * M_PI / 180.0); }
 
-double haversine(const double lat1d, const double lon1d, const double lat2d, const double lon2d) {
-    constexpr double r = 6371.0; // earth radius in KM
-    const double lat1 = deg2rad(lat1d);
-    const double lon1 = deg2rad(lon1d);
-    const double lat2 = deg2rad(lat2d);
-    const double lon2 = deg2rad(lon2d);
-    const double dlat = lat2 - lat1, dlon = lon2 - lon1;
-    const double a = std::pow(std::sin(dlat / 2), 2) +
-                     std::cos(lat1) * std::cos(lat2) *
-                     std::pow(std::sin(dlon / 2), 2);
-    return 2 * r * std::asin(std::sqrt(a));
-}
 
 ostream operator<<(const ostream &lhs, const chrono::duration<long long, ratio<1, 1000> > &rhs);
 
@@ -226,12 +206,11 @@ Graph Dataset::parseData() {
             const string name = t.value("name", "unknown"); //catch incase name tag is missing
             //For some reason the maxspeed or speed limit isn't displayed, but I assume if it's not listed, its 25 according to nyc law.
             double speed = 25 * 1.60934; // default 25mph to 40.23 km/h
+            double freeFlowSpeed = 0;
             if (t.contains("maxspeed")) speed = std::stod(t["maxspeed"].get<std::string>()) * 1.60934;
             const auto &u = e["nodes"];
             //loop the adjacency list
-            for (size_t i = 0; i + 1 < u.size(); ++i) {
-                double freeFlowSpeed = 0;
-                const long long segmentID = edgeID * 100 + static_cast<long long>(i); // unique per segment
+            for (size_t i = 0; i + 1 < u.size(); ++i) {const long long segmentID = edgeID * 100 + static_cast<long long>(i); // unique per segment
                 Vertex *srcNode = graph.getVertex((u[i].get<long long>()));
                 Vertex *destNode = graph.getVertex((u[i + 1].get<long long>()));
                 //calc distance between 2 nodes

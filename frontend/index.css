@@ -17,7 +17,7 @@ body {
 
 .sidebar {
     width: 320px;
-    height: 100vh;
+    height: 108.19vh;
     background: #1a1a2e;
     padding: 30px 20px;
     display: flex;
@@ -43,7 +43,8 @@ body {
     gap: 12px;
 }
 
-.inputs input {
+.inputs input,
+.inputs select {
     padding: 12px;
     border-radius: 8px;
     border: 1px solid #2a2a4a;
@@ -53,7 +54,8 @@ body {
     outline: none;
 }
 
-.inputs input:focus {
+.inputs input:focus,
+.inputs select:focus {
     border-color: #e94560;
 }
 

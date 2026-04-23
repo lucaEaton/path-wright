@@ -20,6 +20,7 @@ add_executable(
         Graph_Architecture/Graph.cpp
         Graph_Architecture/Graph.h
         api.cpp
+        utils.h
 )
 
 target_link_libraries(traffic_light_system PRIVATE CURL::libcurl)

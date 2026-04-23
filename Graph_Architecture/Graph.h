@@ -25,6 +25,11 @@ class Graph {
         [[nodiscard]] Edge *getEdge(long long id) const;
         [[nodiscard]] const std::unordered_map<long long, std::unique_ptr<Vertex>> &getVertices() const;
         [[nodiscard]] RouteResult Dijkstra(const string &nameA, const string &nameB) const;
+
+        double heuristic(long long a, long long b) const;
+
+        RouteResult AStar(const string &nameA, const string &nameB) const;
+
         [[nodiscard]] size_t size() const;
         void print() const;
         [[nodiscard]] const unordered_map<long long, std::unique_ptr<Edge>>& getEdges() const;
