@@ -1,41 +1,81 @@
-# PathWright
-A real-time road network graph built from live OpenStreetMap data, with shortest-path routing based on actual travel time. Built in C++ as the foundation for an adaptive traffic signal control system.
+# Pathwright
+A real-time traffic routing engine for NYC, built in C++ on top of 
+live OpenStreetMap road data and the TomTom Flow API. Computes the fastest 
+driving route between any two streets using live traffic speeds, benchmarks 
+three shortest-path algorithms head-to-head, and serves results over HTTP 
+with visual route plotting.
 
 ## Status
-- Work in Progress (actively being developed)
+core routing engine complete, accuracy improvements in progress.
 
 ## What It Does
-- Pulls live road data for a given area of Manhattan from OpenStreetMap
-- Builds a graph where every intersection is a node and every road segment is an edge
-- Weights each road by how long it actually takes to drive it, not just how long it is
-- Finds the fastest route between any two streets using Dijkstra's algorithm
-
+- Fetches live road network data for 2000 meter radius around John Jay College from OpenStreetMap
+- Constructs a weighted directed graph where every intersection is a node 
+  and every road segment is a weighted edge
+- Fires concurrent HTTP requests to the TomTom Flow Segment API to update 
+  every edge with real-time traffic speeds
+- Computes the fastest route between two streets using Dijkstra's, A*, 
+  and Bellman-Ford, benchmarked side by side
+- Serves routing results over a live HTTP server with visual path plotting
 
 ## How It Works
-### Getting the Data
-The program sends a http request to the [OpenStreetMap Overpass API](https://overpass-api.de/) and pulls back every road, intersection, and speed limit in the queried area. No static files, no manual downloads — it fetches live every time.
 
-### Building the Graph
-Once the data comes back, it gets parsed into a graph:
-- **Nodes** → real intersections, each with a latitude and longitude
-- **Edges** → road segments connecting those intersections, tagged with street name, distance, and speed limit
-- Each of these objects are matched to an unique ID
+### 1. Road Network Ingestion
+Pathwright sends a request to the OpenStreetMap Overpass API and pulls back 
+every drivable road, intersection, and speed limit in the target area. 
+No static files, no manual downloads, the graph is built fresh from live 
+data on every run.
 
-Roads with multiple intersections along them get automatically split into individual segments.
+### 2. Graph Construction
+The raw OSM data is parsed into a directed weighted graph:
+- **Vertices**: real intersections, each with a latitude/longitude and unique OSM ID
+- **Edges**: road segments connecting those intersections, tagged with 
+  street name, distance (haversine), speed limit, and travel time weight
+- Roads spanning multiple intersections are automatically split into 
+  individual segments
 
-### Weights
-Distance alone isn't a great measure of how long a route takes. A short road with a low speed limit can be slower than a longer road with a higher one. So each edge is weighted by **travel time** — `distance / speed` — meaning Dijkstra finds the fastest route, not just the shortest one.
+### 3. Live Traffic Weights
+Static speed limits alone don't reflect real driving conditions. 
+Once the graph is built, Pathwright fires concurrent requests to the 
+TomTom Flow Segment API using libcurl's multi interface, one request 
+per edge, all in parallel and updates each edge with:
+- **Current speed**: actual traffic speed right now
+- **Free flow speed**: the speed under no congestion conditions
+- **Road closure status**: closed roads are set to infinity weight 
+  and excluded from routing
 
-### Path Finding
-Dijkstra's algorithm runs on the graph to find the optimal path between two points, returning the estimated travel time in minutes.
+### 4. Travel Time Weighting
+Each edge weight represents the estimated driving time in minutes:
 
-## Next step
-- Right now edge weights are based on static speed limits from the map data. The next step is making them dynamic, updating road speeds based on real-time congestion so the graph reflects what's actually happening on the street, not just what the speed limit says. From there, the goal is a full adaptive traffic signal systemm using congestion per intersection to adjust green light timings in real time, and re-routing traffic automatically as conditions change.
+This means the routing algorithms find the fastest route, not just 
+the shortest one.
 
-- Quality Assurance (QA)
+### 5. Routing Algorithms
+Three algorithms run on the same graph and are benchmarked against each other:
+Where V = # of Nodes and E = # of Edges
+| Algorithm | Time Complexity | Typical Runtime |
+|---|---|---|
+| Dijkstra's | O((V + E) log V) | ~4ms |
+| A* | O((V + E) log V) | ~3ms |
+| Bellman-Ford | O(V · E) | ~1.2s |
+
+Results are served over HTTP and plotted visually with each algorithm's 
+path rendered in a distinct color.
+
+## Accuracy
+Travel time estimates are validated against Google Maps. Current accuracy 
+on Manhattan routes: **within 1–4 minutes**.
+
+## Roadmap
+- [ ] Intersection delay modeling (traffic signal penalties per OSM node)
+- [ ] Turn penalty costs
+- [ ] Peak hour congestion profiles
+- [ ] Adaptive traffic signal control — adjusting green light timings 
+      dynamically based on per-intersection congestion
 
 ## Tech Stack
 - **C++**
-- **libcurl** — HTTP requests to the Overpass API
+- **libcurl** — concurrent HTTP requests (Overpass API + TomTom Flow API)
 - **nlohmann/json** — JSON parsing
-- **OpenStreetMap** — road network data
+- **OpenStreetMap Overpass API** — live road network data
+- **TomTom Flow Segment API** — real-time traffic speeds
