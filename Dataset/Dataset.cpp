@@ -205,7 +205,7 @@ Graph Dataset::parseData() {
             const auto &t = e["tags"];
             const string name = t.value("name", "unknown"); //catch incase name tag is missing
             //For some reason the maxspeed or speed limit isn't displayed, but I assume if it's not listed, its 25 according to nyc law.
-            double speed = 25 * 1.60934; // default 25mph to 40.23 km/h
+            double speed = 17 * 1.60934; // default 17mph to k/m
             double freeFlowSpeed = 0;
             if (t.contains("maxspeed")) speed = std::stod(t["maxspeed"].get<std::string>()) * 1.60934;
             const auto &u = e["nodes"];
@@ -217,7 +217,7 @@ Graph Dataset::parseData() {
                 const double dist = haversine(srcNode->getLat(),
                                               srcNode->getLon(),
                                               destNode->getLat(),
-                                              destNode->getLon());
+                                              destNode->getLon()) * 1.60934;
 
                 graph.addStreet(segmentID, name);
                 graph.addEdge(segmentID, srcNode, destNode, dist, speed, name, freeFlowSpeed);
@@ -244,15 +244,10 @@ Graph Dataset::parseData() {
         const auto srcNode = edge->getSrc();
         const auto destNode = edge->getDst();
 
-        // We grab the middle cords of the edge as an "estimate" for determining what edge we're looking at.
-        double midLat = (srcNode->getLat() + destNode->getLat()) / 2.0;
-        double midLon = (srcNode->getLon() + destNode->getLon()) / 2.0;
-
-        //pass in the mid-cords and the API key
         auto url = std::format(
-            "https://api.tomtom.com/traffic/services/4/"
-            "flowSegmentData/absolute/10/json?point={:.6f},{:.6f}&key={}",
-            midLat, midLon, apiKey);
+     "https://api.tomtom.com/traffic/services/4/"
+         "flowSegmentData/absolute/22/json?point={:.6f},{:.6f}&key={}",
+        srcNode->getLat(), srcNode->getLon(), apiKey);
 
         CURL *curl_edge = curl_easy_init();
         responses[curl_edge] = "";
@@ -288,7 +283,7 @@ Graph Dataset::parseData() {
             try {
                 auto tom_tom_data = json::parse(response);
                 // if TomTomAPI is not confident, neither am I
-                if (tom_tom_data["flowSegmentData"]["confidence"] < 0.5) {
+                if (tom_tom_data["flowSegmentData"]["confidence"] < 0.2) {
                     // avoiding memory leak since we're dealing with pointers
                     curl_multi_remove_handle(curlMulti, completedHandle);
                     curl_easy_cleanup(completedHandle);
