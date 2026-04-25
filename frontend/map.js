@@ -56,11 +56,23 @@ document.getElementById("find-button").addEventListener('click', () => {
         document.getElementById("result").innerHTML =
             `<p>green dot represents src node, red represents target node</p>
              <p><br></p>
-             <p><strong>dijkstra</strong> (blue): <br>| ${dijkstra.travelTime} minutes <br>| ${pathDistance(dijkstra.path)} miles <br>| run time: ${dijkstra.runTime} ms</p>
+             <p><strong>dijkstra</strong> (blue): 
+             <br>| ${dijkstra.travelTime} minutes 
+             <br>| ${pathDistance(dijkstra.path)} miles 
+             <br>| run time: ${dijkstra.runTime} ms 
+             <br>| edges visited : ${dijkstra.edgesVisited}</p>
              <p><br></p>
-             <p><strong>a*</strong> (red): <br>| ${aStar.travelTime} minutes <br>| ${pathDistance(aStar.path)} miles <br>| run time: ${aStar.runTime} ms</p>
+             <p><strong>a*</strong> (red): 
+             <br>| ${aStar.travelTime} minutes 
+             <br>| ${pathDistance(aStar.path)} miles
+             <br>| run time: ${aStar.runTime} ms
+             <br>| edges visited : ${aStar.edgesVisited}</p>
              <p><br></p>
-             <p><strong>bellman-ford</strong> (green): <br>| ${bellmanFord.travelTime} minutes <br>| ${pathDistance(aStar.path)} miles <br>| run time: ${bellmanFord.runTime} ms</p>
+             <p><strong>bellman-ford</strong> (green): 
+             <br>| ${bellmanFord.travelTime} minutes 
+             <br>| ${pathDistance(bellmanFord.path)} miles 
+             <br>| run time: ${bellmanFord.runTime} ms
+             <br>| edges visited : ${bellmanFord.edgesVisited}</p>
              <p><br></p>
              <p>(purple): all paths overlapping</p>
              <p>(orange): dijkstra + a* overlapping</p>
@@ -174,13 +186,13 @@ document.getElementById("find-button").addEventListener('click', () => {
         const endPoint = dijkstra.path[dijkstra.path.length - 1];
 
         startMarker = L.marker([startPoint.lat, startPoint.lon], {icon: colorMarker('#00ff88')})
-            .bindPopup(`<strong>${startPoint.lat}, ${startPoint.lon}</strong>`).addTo(map);
+            .bindPopup(`<strong>${sA} : ${startPoint.lat}, ${startPoint.lon}</strong>`).addTo(map);
 
         endMarker = L.marker([endPoint.lat, endPoint.lon], {icon: colorMarker('#e94560')})
-            .bindPopup(`<strong>${endPoint.lat}, ${endPoint.lon}</strong>`).addTo(map);
+            .bindPopup(`<strong>${sB}: ${endPoint.lat}, ${endPoint.lon}</strong>`).addTo(map);
 
     }).catch(err => {
-        document.getElementById("result").innerText = `Error: ${err.message}`;
+        document.getElementById("result").innerText = `No Possible Path`;
     });
 });
 

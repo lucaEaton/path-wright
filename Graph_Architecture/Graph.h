@@ -14,6 +14,7 @@ class Graph {
             double travelTime = -1;
             vector<pair<double,double>> path;
             long long runTime;
+            long long eVst;
         };
 
         Graph(size_t vertexCount, size_t edgeCount);

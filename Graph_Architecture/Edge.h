@@ -19,6 +19,8 @@ class Edge {
 
         double getFreeFlowS() const;
 
+        long long getID() const;
+
         void setWeight(double w);
 
         void setSpeed(double s);

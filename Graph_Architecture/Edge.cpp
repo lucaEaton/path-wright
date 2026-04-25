@@ -103,6 +103,14 @@ double Edge::getWeight() const {
 double Edge::getFreeFlowS() const {
     return ffSpeed_;
 }
+
+/**
+ *
+ * @return edge id
+ */
+long long Edge::getID() const {
+    return id_;
+}
 /**
  * @note
  * sets the weight of our edge object
