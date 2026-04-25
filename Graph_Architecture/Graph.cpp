@@ -188,6 +188,7 @@ Graph::RouteResult Graph::Dijkstra(const string &nameA, const string &nameB) con
     unordered_set<long long> vst; // visited list
     unordered_map<long long, double> dist; // distance list (cost)
     unordered_map<long long, long long> prev;
+    long long eVst = 0;
     // set all indexes to INF
     for (const auto &id: getVertices() | views::keys) dist[id] = std::numeric_limits<double>::infinity();
 
@@ -210,6 +211,7 @@ Graph::RouteResult Graph::Dijkstra(const string &nameA, const string &nameB) con
         const Vertex *current = getVertex(currId);
         vst.insert(currId);
         for (auto u: current->getEdges()) {
+           if (!vst.contains(u->getID()))  eVst++;
             auto b = u->getNeighbor(current); // target node of curr edge
             auto w = u->getWeight(); // weight of our edge
             if (dist[currId] + w < dist[b->getId()]) {
@@ -230,12 +232,13 @@ Graph::RouteResult Graph::Dijkstra(const string &nameA, const string &nameB) con
     }
     std::cout << "\n(Dijkstra) Shortest travel time between " << nameA << " and " << nameB << " : "
             << std::ceil(best) << " mins\n";
-    std::cout << "Time Taken :" << duration << std::endl;
+    std::cout << "Time Taken :" << duration << " | Edges Visited: :"<< eVst<<std::endl;
 
     // reconstruct path by walking back through prev
     RouteResult result;
     result.travelTime = std::ceil(best);
     result.runTime = duration.count();
+    result.eVst = eVst;
     // start at the target and walk backwards through prev
     // we stop once we hit the source node
     for (long long cur = target; cur != src; cur = prev[cur]) {
@@ -252,9 +255,9 @@ Graph::RouteResult Graph::Dijkstra(const string &nameA, const string &nameB) con
 
 Graph::RouteResult Graph::Bellman_Ford(const string &nameA, const string &nameB) const {
     const auto t_start = std::chrono::high_resolution_clock::now();
-    unordered_set<long long> vst;
     unordered_map<long long, double> dist;
     unordered_map<long long, long long> prev;
+    long long eVst = 0;
 
     for (const auto &id: getVertices() | views::keys) dist[id] = std::numeric_limits<double>::infinity();
 
@@ -270,6 +273,7 @@ Graph::RouteResult Graph::Bellman_Ford(const string &nameA, const string &nameB)
         for (const auto &[id, v] : getVertices()) {
             if (dist[id] == std::numeric_limits<double>::infinity()) continue;
             for (const auto &u: v->getEdges()) {
+                eVst++;
                 const auto neighbor = u->getNeighbor(v.get());
                 if (const double w = u->getWeight(); dist[id] + w < dist[neighbor->getId()]) {
                     dist[neighbor->getId()] = dist[id] + w;
@@ -289,12 +293,13 @@ Graph::RouteResult Graph::Bellman_Ford(const string &nameA, const string &nameB)
     }
     std::cout << "\n(Bellman-Ford) Shortest travel time between " << nameA << " and " << nameB << " : "
             << std::ceil(best) << " mins\n";
-    std::cout << "Time Taken :" << duration << std::endl;
+    std::cout << "Time Taken :" << duration << " | Edges Visited: :"<< eVst<<std::endl;
 
     // reconstruct path by walking back through prev
     RouteResult result;
     result.travelTime = std::ceil(best);
     result.runTime = duration.count();
+    result.eVst = eVst;
     // start at the target and walk backwards through prev
     // we stop once we hit the source node
     for (long long cur = target; cur != src; cur = prev[cur]) {
@@ -325,6 +330,7 @@ Graph::RouteResult Graph::AStar(const string &nameA, const string &nameB) const 
     unordered_map<long long, double> dist;
     unordered_map<long long, long long> prev;
     unordered_map<long long, double> g; // actual cost from src
+    long long eVst = 0;
 
     for (const auto &id: getVertices() | views::keys) {
         dist[id] = std::numeric_limits<double>::infinity();
@@ -353,6 +359,7 @@ Graph::RouteResult Graph::AStar(const string &nameA, const string &nameB) const 
         vst.insert(currId);
 
         for (auto u: current->getEdges()) {
+            if (!vst.contains(u->getID()))  eVst++;
             auto b = u->getNeighbor(current);
             auto w = u->getWeight();
             if (g[currId] + w < g[b->getId()]) {
@@ -373,12 +380,13 @@ Graph::RouteResult Graph::AStar(const string &nameA, const string &nameB) const 
     }
     std::cout << "\n(A*) Shortest travel time between " << nameA << " and " << nameB << " : "
             << std::ceil(best) << " mins\n";
-    std::cout << "Time Taken :" << duration << std::endl;
+    std::cout << "Time Taken :" << duration << " | Edges Visited: :"<< eVst<<std::endl;
 
     // reconstruct path by walking back through prev
     RouteResult result;
     result.travelTime = std::ceil(best);
     result.runTime = duration.count();
+    result.eVst = eVst;
     // start at the target and walk backwards through prev
     // we stop once we hit the source node
     for (long long cur = target; cur != src; cur = prev[cur]) {

@@ -56,7 +56,7 @@ void Dataset::overseeAPI() {
     CURL *curl = curl_easy_init();
     //raw string query
     const string q =
-            R"([out:json][timeout:60];(way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential|unclassified|living_street)$"](around:2000,40.7692,-73.9866);node(w););out body qt;)";
+            R"([out:json][timeout:60];(way["highway"~"^(motorway|trunk|primary|secondary|tertiary|residential|unclassified|living_street)$"](around:3000,40.7692,-73.9866);node(w););out body qt;)";
     //storing the query for us to "point" curl back to it.
     const string data = "data=" + q;
     curl_easy_setopt(curl, CURLOPT_URL, "https://overpass-api.de/api/interpreter"); //set domain
@@ -184,7 +184,7 @@ Graph Dataset::parseData() {
         if (e["type"] == "way") edgeCount += e["nodes"].size() - 1;
     }
     std::cout << "#nodes: " << nodeCount << std::endl;
-    std::cout << "#edges: " << edgeCount << std::endl;
+    std::cout << "#edges: ~" << edgeCount*2 << std::endl;
     Graph graph(nodeCount, edgeCount); //create graph object with allocated memory
 
     //within the json file, if the type is = to 'node', then it can be saved n parsed as a vertex object

@@ -39,13 +39,14 @@ int main() {
         const auto sA = req.url_params.get("streeta");
         const auto sB = req.url_params.get("streetb");
         std::lock_guard<std::mutex> lock(graph_mutex);
-        const auto [travelTime, path, runTime] = graph->Dijkstra(sA, sB);
+        const auto [travelTime, path, runTime, eVst] = graph->Dijkstra(sA, sB);
         if (travelTime < 0) return crow::response(404, "No path found");
 
         nlohmann::json res;
         res["travelTime"] = travelTime;
         res["path"] = nlohmann::json::array();
         res["runTime"] = runTime;
+        res["edgesVisited"] = eVst;
         // convert our result.path to now a json array
         for (const auto &[lat, lon]: path) res["path"].push_back({{"lat", lat}, {"lon", lon}});
 
@@ -59,13 +60,14 @@ int main() {
         const auto sA = req.url_params.get("streeta");
         const auto sB = req.url_params.get("streetb");
         std::lock_guard<std::mutex> lock(graph_mutex);
-        const auto [travelTime, path, runTime] = graph->AStar(sA, sB);
+        const auto [travelTime, path, runTime, eVst] = graph->AStar(sA, sB);
         if (travelTime < 0) return crow::response(404, "No path found");
 
         nlohmann::json res;
         res["travelTime"] = travelTime;
         res["path"] = nlohmann::json::array();
         res["runTime"] = runTime;
+        res["edgesVisited"] = eVst;
         // convert our result.path to now a json array
         for (const auto &[lat, lon]: path) res["path"].push_back({{"lat", lat}, {"lon", lon}});
 
@@ -79,13 +81,14 @@ int main() {
         const auto sA = req.url_params.get("streeta");
         const auto sB = req.url_params.get("streetb");
         std::lock_guard<std::mutex> lock(graph_mutex);
-        const auto [travelTime, path, runTime] = graph->Bellman_Ford(sA, sB);
+        const auto [travelTime, path, runTime, eVst] = graph->Bellman_Ford(sA, sB);
         if (travelTime < 0) return crow::response(404, "No path found");
 
         nlohmann::json res;
         res["travelTime"] = travelTime;
         res["path"] = nlohmann::json::array();
         res["runTime"] = runTime;
+        res["edgesVisited"] = eVst;
         // convert our result.path to now a json array
         for (const auto &[lat, lon]: path) res["path"].push_back({{"lat", lat}, {"lon", lon}});
 
