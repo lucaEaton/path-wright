@@ -53,11 +53,12 @@ the shortest one.
 ### 5. Routing Algorithms
 Three algorithms run on the same graph and are benchmarked against each other:
 Where V = # of Nodes and E = # of Edges
+Given a 3km radius
 | Algorithm | Time Complexity | Typical Runtime |
 |---|---|---|
-| Dijkstra's | O((V + E) log V) | ~4ms |
+| Dijkstra's | O((V + E) log V) | ~10ms |
 | A* | O((V + E) log V) | ~3ms |
-| Bellman-Ford | O(V · E) | ~1.2s |
+| Bellman-Ford | O(V · E) | ~6s |
 
 Results are served over HTTP and plotted visually with each algorithm's 
 path rendered in a distinct color.
@@ -66,16 +67,81 @@ path rendered in a distinct color.
 Travel time estimates are validated against Google Maps. Current accuracy 
 on Manhattan routes: **within 1–4 minutes**.
 
-## Roadmap
-- [ ] Intersection delay modeling (traffic signal penalties per OSM node)
-- [ ] Turn penalty costs
-- [ ] Peak hour congestion profiles
-- [ ] Adaptive traffic signal control — adjusting green light timings 
-      dynamically based on per-intersection congestion
+## How to run it on your machine
+ 
+### Prerequisites
+ 
+- C++ compiler with C++20 support
+- `libcurl`, `nlohmann/json`, and `Crow` installed
+- Node.js + npm
+- A [TomTom API key](https://developer.tomtom.com/) (free tier works)
+---
+ 
+### 1. Clone the repository
+ 
+```bash
+git clone https://github.com/your-username/path-wright.git
+cd path-wright
+```
+ 
+> The root of the project is the folder you land in after `cd path-wright` — it's the directory that contains `CMakeLists.txt` and the `frontend/` folder. All backend commands are run from here.
+ 
+---
+ 
+### 2. Set your TomTom API key
+ 
+```bash
+export TOMTOM_API_KEY=your_key_here
+```
+ 
+> On Windows (PowerShell): `$env:TOMTOM_API_KEY="your_key_here"`
+ 
+---
+ 
+### 3. Build and run the backend
+ 
+From the **root of the project**:
+ 
+```bash
+mkdir build && cd build
+cmake ..
+make
+./path-wright
+```
 
+Simply just press the run button as the backend is within a main() function
+The backend server will start on `http://localhost:8000`. Keep this terminal open.
+ 
+---
+ 
+### 4. Run the frontend
+ 
+Open a **new terminal**, then from the **root of the project**:
+ 
+```bash
+cd frontend
+npm install
+npm run dev
+```
+ 
+Open the URL Vite provides (typically `http://localhost:5173`) in your browser.
+ 
+---
+ 
+> **Important:** The backend must be running before interacting with the frontend. All algorithm requests are sent to `localhost:8000` — if the backend is not running, no paths will load.
+ 
+---
+ 
 ## Tech Stack
-- **C++**
-- **libcurl** — concurrent HTTP requests (Overpass API + TomTom Flow API)
+ 
+**Backend**
+- **C++20**
+- **libcurl** — concurrent HTTP requests via `curl_multi` (Overpass API + TomTom Flow API)
 - **nlohmann/json** — JSON parsing
+- **Crow** — lightweight C++ HTTP server
 - **OpenStreetMap Overpass API** — live road network data
-- **TomTom Flow Segment API** — real-time traffic speeds
+- **TomTom Flow Segment API** — real-time traffic speeds and road closures
+**Frontend**
+- **Vite + JavaScript**
+- **Leaflet.js** — interactive map rendering and polyline visualization
+---
