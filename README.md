@@ -5,8 +5,7 @@ driving route between any two streets using live traffic speeds, benchmarks
 three shortest-path algorithms head-to-head, and serves results over HTTP 
 with visual route plotting.
 
-## Status
-core routing engine complete, accuracy improvements in progress.
+https://github.com/user-attachments/assets/c7efebf0-18a0-4e19-aa2a-0456a6110661
 
 ## What It Does
 - Fetches live road network data for 2000 meter radius around John Jay College from OpenStreetMap
